@@ -1,48 +1,81 @@
 import re
+from io import TextIOWrapper
+
+"""
+Nolan Gregory
+Advent of Code 2023
+Day 2
+
+- Solved: Yes
+- Stars gained: 2
+- Difficulty: 3/10
+"""
 
 
-def one():
+def one(data: TextIOWrapper) -> int:
+    """
+    Prompt: You are given records for games (looks like Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green). Determine which 
+    games would have been possible if the bag had been loaded with only 12 red cubes, 13 green cubes, and 14 blue cubes. 
+    Return the sum of the IDs of games which satisfy the constraints.
+
+    Solution: 2149
+
+    Explaination: Use regex to split on the colons and semi colons of the string, which returns the game # as idx 0 and the
+    colors as idx n-1. Use list unpacking to store the color values, then turn them into their own elements by splitting on
+    commas, and determine if all the integers associated with each color is less than the threshold. Return the sum of the
+    games that have colors <= threshold.
+
+    Caveats: Initially read the problem wrong and thought that the sum was based on each game, not each subgame.
+
+    Alternate Solution: N/a. 
+    """
+    thresholds: dict[str, int] = {"red": 12, "green": 13, "blue": 14}
+    total_sum: int = 0
+    for line in data:
+        game, *bundle = re.split(': |;', line)
+        bundle = [item.strip().split(',') for item in bundle]
+        valid = all(int(value.split()[0]) <= thresholds.get(
+            value.split()[1], 0) for item in bundle for value in item)
+        total_sum += int(game.split()[1]) if valid else 0
+    return total_sum
+
+
+def two(data):
+    """
+    Prompt: The power of a set of cubes is equal to the numbers of red, green, and blue cubes multiplied together. The 
+    power of the minimum set of cubes in game 1 is 48. In games 2-5 it was 12, 1560, 630, and 36, respectively. Adding 
+    up these five powers produces the sum 2286. For each game, find the minimum set of cubes that must have been present. 
+    Return the sum of the power of these sets.
+
+    Solution: 71274
+
+    Explaination: Similar to above, just modified algorith to return the sum of the product of each rounds cubes.
+
+    Caveats: N/a.
+
+    Alternate Solution: N/a. 
+    """
+    total = 0
+    for line in data:
+        max_values = {"red": 0, "green": 0, "blue": 0}
+        _, *data = re.split(': |;', line)
+        values = [item.strip().split()
+                  for sublist in data for item in sublist.split(',')]
+        for value, color in values:
+            value = int(value)
+            max_values[color] = max(max_values[color], value)
+        total += max_values["red"] * max_values["green"] * max_values["blue"]
+    return total
+
+
+def main():
     with open("./data.txt", "r") as file:
-        f = file.read().splitlines()
-        d = {"red": 12, "green": 13, "blue": 14}
-        t = 0
-        for line in f:
-            mapped = re.split(': |;', line)
-            u = mapped[0]
-            x = [x.strip().split(',') for x in mapped[1:]]
-            valid = True
-            for i in x:
-                for r in i:
-                    v = r.strip().split(' ')
-                    thresh = d.get(v[1])
-                    if int(v[0]) > thresh:
-                        valid = False
-            if valid:
-                t += int(u.strip().split(' ')[1])
-        print(t)
+        data = file.read().splitlines()
+        solution_one = one(data)
+        print(solution_one)
+        solution_two = two(data)
+        print(solution_two)
 
 
-def two():
-    with open("./data.txt", "r") as file:
-        f = file.read().splitlines()
-        t = 0
-        for line in f:
-            mapped = re.split(': |;', line)
-            x = [x.strip().split(',') for x in mapped[1:]]
-            max_r = 0
-            max_g = 0
-            max_b = 0
-            for v in x:
-                for i in v:
-                    n = i.strip().split(' ')
-                    if n[1] == 'blue' and int(n[0]) > max_b:
-                        max_b = int(n[0])
-                    if n[1] == 'green' and int(n[0]) > max_g:
-                        max_g = int(n[0])
-                    if n[1] == 'red' and int(n[0]) > max_r:
-                        max_r = int(n[0])
-            t += max_r * max_b * max_g
-        print(t)
-
-
-two()
+if __name__ == "__main__":
+    main()

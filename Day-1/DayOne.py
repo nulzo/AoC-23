@@ -39,11 +39,11 @@ def part_one(file: TextIOWrapper) -> int:
     leftmost digit is found, a rightmost digit is found, or idx == idx of both ptrs. 
     """
     # # Part One (Normal)
-    # total: int = 0
-    # for line in file:
-    #     if x := re.findall(r'[0-9]', line):
-    #         total += int(x[0] + x[-1])
-    # # return total
+    total: int = 0
+    for line in file:
+        if x := re.findall(r'[0-9]', line):
+            total += int(x[0] + x[-1])
+    return total
 
     # # Part One (epic)
     return sum(int(x[0] + x[-1]) for line in file if (x := re.findall(r'\d', line)))
